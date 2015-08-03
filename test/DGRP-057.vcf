@@ -1,5 +1,5 @@
 ##fileformat=VCFv4.1
-##source_20130825.1=vcf-subset(r797) -e -c DGRP-057 freeze2.vcf.vcf.vcf
+##source_NNN=vcf-subset(r797) -e -c DGRP-057
 ##INFO=<ID=AC,Number=1,Type=Integer,Description="Allele count">
 ##INFO=<ID=CNV,Number=0,Type=Flag,Description="Copy Number Variant">
 ##INFO=<ID=HP,Number=0,Type=Flag,Description="Homopolymer indel">

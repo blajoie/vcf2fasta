@@ -48,17 +48,20 @@ def main():
     last_chrom=None
     chrs=dict()
     
+    # open vcf file
     if vcf_file.endswith('.gz'):
         vcf_fh=gzip.open(vcf_file,'r')
     else:
         vcf_fh=open(vcf_file,'r')
     
+    # iterate over vcf file
     for linenum,line in enumerate(vcf_fh):
-        if line.startswith("##"):
+        if line.startswith("##"): # skip headers
             continue
         
         line=line.rstrip("\n")
         
+        # get header line
         if line.startswith("#"):
             header=line.lstrip("#").split("\t");
             header2index=dict([(h,i) for i,h in enumerate(header)])
@@ -126,6 +129,7 @@ def main():
     
     verboseprint("")
     
+    # ensure all snps are sorted by position (sorted seperatley for each chromosome)
     verboseprint("sorting by position")
     for chr in snps: # ensure sorted by pos
         snp_positions=snps[chr]
@@ -138,6 +142,7 @@ def main():
   
     verboseprint("processing REF file")
     
+    # get output name
     ref_fasta_name=os.path.basename(ref_fasta)
     ref_fasta_name=re.sub(".gz", "", ref_fasta_name)
     ref_fasta_name=re.sub(".fasta", "", ref_fasta_name)
@@ -151,14 +156,17 @@ def main():
     last_chrom=None
     tmp_pos_list=[(None,None)]
     
+    # open reference fasta file
     if ref_fasta.endswith('.gz'):
         ref_fh=gzip.open(ref_fasta,'r')
     else:
         ref_fh=open(ref_fasta,'r')
     
+    # iterate over fasta file
     for linenum,line in enumerate(ref_fh):
         line=line.rstrip("\n")
         
+        # search for > (contig name)
         regexp = re.compile('>')
         if regexp.search(line):
             if line.startswith(">"):
@@ -166,7 +174,7 @@ def main():
                 pos=1
                 print(line,"-",name,file=out_fh,sep="")
                 continue
-            else:
+            else: # random > found in line - issue with cat ?
                 sys.exit('error with fasta file'+'\n'+str(line))
         
         if(chrom != last_chrom):
@@ -199,26 +207,26 @@ def main():
         if((current_snp[0] == None) or (current_snp[0] > end)):
             print(line,file=out_fh)
         else:
-            #print(chrom,start,end)
-            #print(line)
-            
             char_list=list(line)
 
             snp_offset=current_snp[0]-start
-            if(snp_offset < 0):
+            if((snp_offset < 0) or (snp_offset > len(char_list))): # check to ensure SNP overlaps interval
                 sys.exit('error'+str(current_snp)+' '+str(snp_offset)+' '+str(start)+'-'+str(end))
                 
-            #print(char_list[snp_offset],current_snp,snp_offset)
+            # replace snp in char arr
             char_list[snp_offset]=current_snp[1]
             placed_snps+=1
+            
             if(len(tmp_pos_list) == 0):
                 current_snp=(None,None)
-                
+                    
+            # handle multiple SNPs per FASTA line (normally 50 chars /buffer/)
             if(len(tmp_pos_list) > 0):
                 current_snp=tmp_pos_list.pop(0)
                 while((current_snp[0] <= end) and (len(tmp_pos_list) > 0)):
                     snp_offset=current_snp[0]-start
-                    #print(char_list[snp_offset],current_snp,snp_offset)
+                    
+                    # replace snp in char arr
                     char_list[snp_offset]=current_snp[1]
                     placed_snps+=1
                     current_snp=tmp_pos_list.pop(0)
@@ -229,18 +237,16 @@ def main():
                     placed_snps+=1
                     current_snp=(None,None)
             
-            line=''.join(char_list)
-            print(line,file=out_fh)
-            #print(line)
-            #print("")
+            # char list to string, and print
+            print(''.join(char_list),file=out_fh)
             
         pos += tmp_len
         last_chrom=chrom
         
     ref_fh.close()
     
+    # handle last line
     verboseprint(" ... ",last_chrom," ",placed_snps," / ",len(snps[last_chrom]),sep="")
-   
            
     # process REFERENCE file
     
