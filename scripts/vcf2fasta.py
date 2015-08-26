@@ -13,6 +13,8 @@ from collections import defaultdict
 
 from operator import itemgetter
 
+__version__ = "1.0"
+
 def main():
 
     parser=argparse.ArgumentParser(description='vcf2fasta (diploid)',formatter_class=argparse.ArgumentDefaultsHelpFormatter)
@@ -21,7 +23,7 @@ def main():
     parser.add_argument('-v', '--vcf', dest='vcf_file', type=str, required=True, help='input vcf file (vcf)')
     parser.add_argument('-n', '--name', dest='name', type=str, required=True, help='sample name (column header)')
     parser.add_argument('--verbose', dest='verbose',  action='count', help='Increase verbosity (specify multiple times for more)')
-    parser.add_argument('--version', action='version', version='%(prog)s 1.0')
+    parser.add_argument('--version', action='version', version='%(prog)s '+__version__)
 
     args=parser.parse_args()
 
