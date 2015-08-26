@@ -22,13 +22,16 @@ optional arguments:
                         (default: None)
   --version             show program's version number and exit
 
-  
+```
+
 ## Usage Examples
 
 ```
 
 python scripts/vcf2fasta.py -r test/dm3__chr2L.fa.gz -v test/DGRP-057.vcf -n DGRP-057
 python scripts/vcf2fasta.py -r test/dm3__chr2L.fa.gz -v test/DGRP-057.vcf -n DGRP-057 --verbose
+
+```
  
 ## Change Log
 
