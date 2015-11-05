@@ -43,6 +43,8 @@ def main():
     
     # process VCF file
     
+    verboseprint("")
+    
     verboseprint("processing VCF file")
     
     snps=defaultdict(list)
@@ -193,7 +195,7 @@ def main():
                 tmp_pos_list=snps[chrom]
                 possible_snps=len(tmp_pos_list)
                 
-            verboseprint("\t",chrom,sep="",end="")
+            verboseprint("\t",chrom," ... ",sep="")
             current_snp=tmp_pos_list.pop(0)
             
             total_placed_snps += placed_snps
@@ -203,22 +205,24 @@ def main():
         start=pos
         end=pos+tmp_len-1
         
-        while((current_snp[0] < start) and (len(tmp_pos_list) > 0)):
+        if((current_snp[0] < start) and (len(tmp_pos_list) > 0)):
             print("ERROR: missed snp!",current_snp,"\t",start,"-",end,">",current_snp[0])
-            current_snp=tmp_pos_list.pop(0)
-        
-        if((current_snp[0] == None) or (current_snp[0] > end)):
-            print(line,file=out_fh)
-        else:
-            char_list=list(line)
+            sys.exit(0)
+            
+        if((current_snp[0] != None) and (current_snp[0] >= start and current_snp[0] <= end)):
+            char_list=list(line.lower())
 
             snp_offset=current_snp[0]-start
             if((snp_offset < 0) or (snp_offset > len(char_list))): # check to ensure SNP overlaps interval
-                sys.exit('error'+str(current_snp)+' '+str(snp_offset)+' '+str(start)+'-'+str(end))
+                sys.exit('\nerror'+str(current_snp)+' '+str(snp_offset)+' '+str(start)+'-'+str(end))
                 
             # replace snp in char arr
             char_list[snp_offset]=current_snp[1]
             placed_snps+=1
+            
+            verboseprint("found a SNP 1 ",placed_snps,current_snp,''.join(char_list))
+
+            current_snp=tmp_pos_list.pop(0)
             
             if(len(tmp_pos_list) == 0):
                 current_snp=(None,None)
@@ -232,17 +236,22 @@ def main():
                     # replace snp in char arr
                     char_list[snp_offset]=current_snp[1]
                     placed_snps+=1
+                    verboseprint("found a SNP 2 ",placed_snps,current_snp,''.join(char_list))
+                    
                     current_snp=tmp_pos_list.pop(0)
                 
                 if((current_snp[0] <= end) and (len(tmp_pos_list) == 0)):
                     snp_offset=current_snp[0]-start
                     char_list[snp_offset]=current_snp[1]
                     placed_snps+=1
+                    
+                    verboseprint("found a SNP 3",placed_snps,current_snp,''.join(char_list))
+                    
                     current_snp=(None,None)
             
             # char list to string, and print
             print(''.join(char_list),file=out_fh)
-            
+             
         pos += tmp_len
         last_chrom=chrom
         
