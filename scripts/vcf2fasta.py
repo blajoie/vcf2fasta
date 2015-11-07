@@ -214,7 +214,7 @@ def main():
 
             snp_offset=current_snp[0]-start
             if((snp_offset < 0) or (snp_offset > len(char_list))): # check to ensure SNP overlaps interval
-                sys.exit('error'+str(current_snp)+' '+str(snp_offset)+' '+str(start)+'-'+str(end))
+                sys.exit('error '+str(current_snp)+' '+str(snp_offset)+' '+str(start)+'-'+str(end))
                 
             # replace snp in char arr
             char_list[snp_offset]=current_snp[1]
